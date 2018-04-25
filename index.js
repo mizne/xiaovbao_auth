@@ -10,68 +10,79 @@ const app = new Koa()
 const router = new Router()
 const wechatClient = new WechatOAuth(config.wechat.appId, config.wechat.secret)
 
-const jwtSecret = 'xiaovbao_jwt_secret'
-const port = 8000
-
-app.use(function(ctx, next) {
-  return next().catch(err => {
-    if (err.status === 401) {
-      ctx.status = 401
-      ctx.body = {
-        error: err.originalError ? err.originalError.message : err.message
-      }
-    } else {
-      throw err
-    }
-  })
-})
-
 app.use(koaBody())
-
-// app.use(jwtMiddleware({
-//   secret: jwtSecret
-// }).unless({
-//   path: [/\/login/, /\/register/, /^\/public/]
-// }));
 
 router.get('/oauth/authorize', (ctx, next) => {
   const query = ctx.query
   console.log(ctx.query)
+
+  const token = jwt.sign(
+    {
+      redirect_uri: ctx.query.redirect_uri
+    },
+    config.jwtSecret,
+    {
+      expiresIn: '30s'
+    }
+  )
+
   const url = wechatClient.getAuthorizeURL(
     config.wechat.oauthCallbackUrl,
-    ctx.query.state,
+    token,
     'snsapi_base'
   )
-  // const token = jwt.sign(ctx.request.body, jwtSecret, {
-  //   expiresIn: '10s'
-  // })
+
   ctx.redirect(url)
-  // ctx.body = query
 })
 
 router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   console.log(`wechat web oauth redirect correct`)
   console.log(ctx.query)
-  ctx.body = {
-    msg: 'wechat_web_oauth'
-  }
-})
 
-router.get('/public/home', (ctx, next) => {
-  ctx.body = {
-    msg: 'hello from home!!!'
-  }
-})
+  const code = await getOpenID(ctx.query.code)
+  const userInfo = await getUser(code)
 
-router.get('/about', (ctx, next) => {
-  console.log(ctx.state.user)
-  ctx.body = {
-    msg: 'hello from about!!!'
+  const decoded = jwt.verify(ctx.query.state, config.jwtSecret)
+  console.log(userInfo)
+  console.log(decoded)
+
+  if (decoded.redirect_uri) {
+    ctx.redirect(decoded.redirect_uri)
+  } else {
+    ctx.body = {
+      msg: 'wechat_web_oauth'
+    }
   }
 })
 
 app.use(router.routes()).use(router.allowedMethods())
 
-app.listen(port, () => {
+app.listen(config.port, () => {
   console.log(`listening on port: ${port}`)
 })
+
+function getOpenID(code) {
+  return new Promise((resolve, reject) => {
+    wechatClient.getAccessToken(code, (err, result) => {
+      if (err) {
+        console.log(err)
+        return reject(err)
+      }
+      const accessToken = result.data.access_token
+      const openid = result.data.openid
+      resolve(openid)
+    })
+  })
+}
+
+function getUser(openid) {
+  return new Promise((resolve, reject) => {
+    wechatClient.getUser(openid, (err, result) => {
+      if (err) {
+        console.log(err)
+        return reject(err)
+      }
+      return resolve(result)
+    })
+  })
+}
