@@ -20,6 +20,8 @@
     "koa-body": "^2.5.0",
     "koa-jwt": "^3.3.1",
     "koa-router": "^7.4.0",
+    "ramda": "^0.25.0",
+    "wechat-api": "^1.35.1",
     "wechat-oauth": "^1.4.0"
   }
 }

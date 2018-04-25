@@ -5,10 +5,13 @@ const jwt = require('jsonwebtoken')
 const jwtMiddleware = require('koa-jwt')
 const WechatOAuth = require('wechat-oauth')
 const config = require('./config/config')
+const WechatAPI = require('wechat-api')
+const ramda = require('ramda')
 
 const app = new Koa()
 const router = new Router()
 const wechatClient = new WechatOAuth(config.wechat.appId, config.wechat.secret)
+const wechatApi = new WechatAPI(config.wechat.appId, config.wechat.secret)
 
 app.use(koaBody())
 
@@ -51,9 +54,10 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   )
 })
 
-router.get('/oauth/test', async (ctx, next) => {
-  console.log(ctx.query)
-  ctx.body = ctx.query
+router.get('/oauth/wechat-jsconfig', async (ctx, next) => {
+  const config = await getJsConfig()
+
+  ctx.body = config
 })
 
 app.use(router.routes()).use(router.allowedMethods())
@@ -84,6 +88,17 @@ function getUser(openid) {
         return reject(err)
       }
       return resolve(result)
+    })
+  })
+}
+
+function getJsConfig() {
+  return new Promise((resolve, reject) => {
+    wechatApi.getJsConfig({}, (err, result) => {
+      if (err) {
+        return reject(err)
+      }
+      return resolve(ramda.filter(ramda.complement(ramda.isNil), result))
     })
   })
 }
