@@ -1,6 +1,6 @@
 {
   "name": "xiaovbao_auth",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "xiaovbao auth",
   "main": "index.js",
   "scripts": {
