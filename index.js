@@ -38,7 +38,7 @@ router.get('/oauth/authorize', (ctx, next) => {
   const query = ctx.query
   console.log(ctx.query)
   const url = wechatClient.getAuthorizeURL(
-    'redirectUrl',
+    config.wechat.oauthCallbackUrl,
     ctx.query.state,
     'snsapi_base'
   )
