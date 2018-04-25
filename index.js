@@ -15,6 +15,9 @@ app.use(koaBody())
 router.get('/oauth/authorize', (ctx, next) => {
   const query = ctx.query
   console.log(ctx.query)
+  if (!ctx.query.redirect_uri) {
+    return ctx.throw('redirect_uri required', 400)
+  }
 
   const token = jwt.sign(
     {
@@ -39,19 +42,27 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   console.log(`wechat web oauth redirect correct`)
   console.log(ctx.query)
 
-  const code = await getOpenID(ctx.query.code)
-  const userInfo = await getUser(code)
+  const openid = await getOpenID(ctx.query.code)
+  const userInfo = await getUser(openid)
 
   const decoded = jwt.verify(ctx.query.state, config.jwtSecret)
   console.log(userInfo)
   console.log(decoded)
 
-  if (decoded.redirect_uri) {
-    ctx.redirect(decoded.redirect_uri)
-  } else {
-    ctx.body = {
-      msg: 'wechat_web_oauth'
+  const token = jwt.sign(
+    {
+      openid: openid
+    },
+    config.jwtSecret,
+    {
+      expiresIn: '12h'
     }
+  )
+
+  if (decoded.redirect_uri) {
+    ctx.redirect(
+      decoded.redirect_uri + `?access_token=${token}&expires_in=${12 * 60 * 60}`
+    )
   }
 })
 
