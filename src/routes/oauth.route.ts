@@ -43,6 +43,7 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
     }
   )
 
+  // 开发环境 微信网页授权state有长度限制 故不用token
   const redirect_uri = config.environment.production
     ? (jwt.verify(ctx.query.state, config.jwtSecret) as any).redirect_uri
     : ctx.query.state
@@ -53,6 +54,7 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   )
 })
 
+// 测试授权回调是否成功
 router.get('/oauth/test', async (ctx, next) => {
   ctx.body = ctx.query
 })
