@@ -11,13 +11,13 @@ interface GetAuthorizeURLOptions {
   scope?: 'snsapi_base' | 'snsapi_userinfo'
 }
 
+const DEFAULT_SCOPE = 'snsapi_base'
+
 function getAuthorizeURL(opt: GetAuthorizeURLOptions): string
 function getAuthorizeURL(state: string): string
 function getAuthorizeURL(params: GetAuthorizeURLOptions | string): string {
   const scope =
-    typeof params === 'string'
-      ? 'snsapi_userinfo'
-      : params.scope || 'snsapi_userinfo'
+    typeof params === 'string' ? DEFAULT_SCOPE : params.scope || DEFAULT_SCOPE
   const state = typeof params === 'string' ? params : params.state
   return wechatClient.getAuthorizeURL(
     config.wechat.oauthCallbackUrl,

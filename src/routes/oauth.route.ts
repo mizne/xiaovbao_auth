@@ -34,6 +34,8 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   const openid = await wechatHelper.getOpenID(ctx.query.code)
   const userInfo = await wechatHelper.getUser(openid)
 
+  // 将用户信息写进数据库
+
   const token = jwt.sign(
     {
       openid: openid
