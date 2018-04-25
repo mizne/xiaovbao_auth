@@ -58,7 +58,7 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
 app.use(router.routes()).use(router.allowedMethods())
 
 app.listen(config.port, () => {
-  console.log(`listening on port: ${port}`)
+  console.log(`listening on port: ${config.port}`)
 })
 
 function getOpenID(code) {
