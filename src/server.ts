@@ -1,10 +1,10 @@
-const Koa = require('koa')
-const Router = require('koa-router')
+import * as Koa from 'koa'
+import * as Router from 'koa-router'
 const koaBody = require('koa-body')
 const jwt = require('jsonwebtoken')
 const jwtMiddleware = require('koa-jwt')
 const WechatOAuth = require('wechat-oauth')
-const config = require('./config/config')
+const config = require('../config/config')
 const WechatAPI = require('wechat-api')
 const ramda = require('ramda')
 
@@ -63,12 +63,12 @@ router.get('/oauth/wechat-jsconfig', async (ctx, next) => {
 app.use(router.routes()).use(router.allowedMethods())
 
 app.listen(config.port, () => {
-  console.log(`listening on port: ${config.port}`)
+  console.log(`listening on port: ${config.port} !!!`)
 })
 
-function getOpenID(code) {
-  return new Promise((resolve, reject) => {
-    wechatClient.getAccessToken(code, (err, result) => {
+function getOpenID(code: string) {
+  return new Promise<string>((resolve, reject) => {
+    wechatClient.getAccessToken(code, (err: Error, result: any) => {
       if (err) {
         console.log(err)
         return reject(err)
@@ -80,9 +80,9 @@ function getOpenID(code) {
   })
 }
 
-function getUser(openid) {
+function getUser(openid: string) {
   return new Promise((resolve, reject) => {
-    wechatClient.getUser(openid, (err, result) => {
+    wechatClient.getUser(openid, (err: Error, result: any) => {
       if (err) {
         console.log(err)
         return reject(err)
@@ -94,7 +94,7 @@ function getUser(openid) {
 
 function getJsConfig() {
   return new Promise((resolve, reject) => {
-    wechatApi.getJsConfig({}, (err, result) => {
+    wechatApi.getJsConfig({}, (err: Error, result: any) => {
       if (err) {
         return reject(err)
       }

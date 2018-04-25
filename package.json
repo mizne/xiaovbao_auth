@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index"
+    "start": "tsc && node dist/server.js"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,10 @@
     "ramda": "^0.25.0",
     "wechat-api": "^1.35.1",
     "wechat-oauth": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.0.45",
+    "@types/koa-router": "^7.0.28",
+    "typescript": "^2.8.3"
   }
 }
