@@ -8,7 +8,7 @@ const wechatApi = new WechatAPI(config.wechat.appId, config.wechat.secret)
 
 interface GetAuthorizeURLOptions {
   state: string
-  scope?: string
+  scope?: 'snsapi_base' | 'snsapi_userinfo'
 }
 
 function getAuthorizeURL(opt: GetAuthorizeURLOptions): string
@@ -48,8 +48,20 @@ function getJsConfig(): Promise<Object> {
   })
 }
 
+function getUser(openid: string): Promise<Object> {
+  return new Promise<string>((resolve, reject) => {
+    wechatClient.getUser(openid, (err: Error, result: any) => {
+      if (err) {
+        return reject(err)
+      }
+      resolve(result)
+    })
+  })
+}
+
 export default {
   getAuthorizeURL,
   getOpenID,
-  getJsConfig
+  getJsConfig,
+  getUser
 }
