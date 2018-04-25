@@ -39,6 +39,13 @@ router.get('/oauth/authorize', (ctx, next) => {
   ctx.body = query
 })
 
+router.get('/wechat_web_oauth', async (ctx, next) => {
+  console.log(ctx.query)
+  ctx.body = {
+    msg: 'wechat_web_oauth'
+  }
+})
+
 router.get('/public/home', (ctx, next) => {
   ctx.body = {
     msg: 'hello from home!!!'
@@ -54,6 +61,6 @@ router.get('/about', (ctx, next) => {
 
 app.use(router.routes()).use(router.allowedMethods())
 
-app.listen(2000, () => {
+app.listen(8000, () => {
   console.log(`listening on port: 2000`)
 })
