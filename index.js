@@ -31,7 +31,7 @@ router.get('/oauth/authorize', (ctx, next) => {
 
   const url = wechatClient.getAuthorizeURL(
     config.wechat.oauthCallbackUrl,
-    token,
+    ctx.query.redirect_uri,
     'snsapi_base'
   )
 
@@ -45,9 +45,7 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   const openid = await getOpenID(ctx.query.code)
   const userInfo = await getUser(openid)
 
-  const decoded = jwt.verify(ctx.query.state, config.jwtSecret)
   console.log(userInfo)
-  console.log(decoded)
 
   const token = jwt.sign(
     {
@@ -61,7 +59,7 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
 
   if (decoded.redirect_uri) {
     ctx.redirect(
-      decoded.redirect_uri + `?access_token=${token}&expires_in=${12 * 60 * 60}`
+      ctx.query.state + `?access_token=${token}&expires_in=${12 * 60 * 60}`
     )
   }
 })
