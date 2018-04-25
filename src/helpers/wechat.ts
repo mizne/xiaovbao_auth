@@ -15,7 +15,9 @@ function getAuthorizeURL(opt: GetAuthorizeURLOptions): string
 function getAuthorizeURL(state: string): string
 function getAuthorizeURL(params: GetAuthorizeURLOptions | string): string {
   const scope =
-    typeof params === 'string' ? 'snsapi_base' : params.scope || 'snsapi_base'
+    typeof params === 'string'
+      ? 'snsapi_userinfo'
+      : params.scope || 'snsapi_userinfo'
   const state = typeof params === 'string' ? params : params.state
   return wechatClient.getAuthorizeURL(
     config.wechat.oauthCallbackUrl,
