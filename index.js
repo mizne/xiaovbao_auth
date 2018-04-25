@@ -49,7 +49,7 @@ router.get('/oauth/authorize', (ctx, next) => {
   // ctx.body = query
 })
 
-router.get('/wechat_web_oauth', async (ctx, next) => {
+router.get('/oauth/wechat_web_oauth', async (ctx, next) => {
   console.log(`wechat web oauth redirect correct`)
   console.log(ctx.query)
   ctx.body = {
