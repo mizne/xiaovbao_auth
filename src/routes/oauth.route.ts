@@ -31,6 +31,7 @@ router.get('/oauth/authorize', (ctx, next) => {
 })
 
 router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
+  console.log(`code: ${ctx.query.code}`)
   const openid = await wechatHelper.getOpenID(ctx.query.code)
   const userInfo = await wechatHelper.getUser(openid)
 
