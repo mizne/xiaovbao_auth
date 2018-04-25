@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && node dist/server.js"
+    "start": "tsc && node dist/src/server.js"
   },
   "repository": {
     "type": "git",
@@ -13,20 +13,22 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "jsonwebtoken": "^8.2.1",
     "koa": "^2.5.0",
     "koa-body": "^2.5.0",
-    "koa-jwt": "^3.3.1",
     "koa-router": "^7.4.0",
     "ramda": "^0.25.0",
     "wechat-api": "^1.35.1",
     "wechat-oauth": "^1.4.0"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^7.2.6",
     "@types/koa": "^2.0.45",
     "@types/koa-router": "^7.0.28",
+    "@types/node": "^9.6.6",
+    "@types/ramda": "^0.25.24",
     "typescript": "^2.8.3"
   }
 }
