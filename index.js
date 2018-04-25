@@ -66,6 +66,11 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   }
 })
 
+router.get('/oauth/test', async (ctx, next) => {
+  console.log(ctx.query)
+  ctx.body = ctx.query
+})
+
 app.use(router.routes()).use(router.allowedMethods())
 
 app.listen(config.port, () => {
