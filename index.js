@@ -8,6 +8,7 @@ const app = new Koa()
 const router = new Router()
 
 const jwtSecret = 'xiaovbao_jwt_secret'
+const port = 8000
 
 app.use(function(ctx, next) {
   return next().catch(err => {
@@ -61,6 +62,6 @@ router.get('/about', (ctx, next) => {
 
 app.use(router.routes()).use(router.allowedMethods())
 
-app.listen(8000, () => {
-  console.log(`listening on port: 2000`)
+app.listen(port, () => {
+  console.log(`listening on port: ${port}`)
 })
