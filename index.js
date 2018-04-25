@@ -14,20 +14,9 @@ app.use(koaBody())
 
 router.get('/oauth/authorize', (ctx, next) => {
   const query = ctx.query
-  console.log(ctx.query)
   if (!ctx.query.redirect_uri) {
     return ctx.throw('redirect_uri required', 400)
   }
-
-  const token = jwt.sign(
-    {
-      redirect_uri: ctx.query.redirect_uri
-    },
-    config.jwtSecret,
-    {
-      expiresIn: '30s'
-    }
-  )
 
   const url = wechatClient.getAuthorizeURL(
     config.wechat.oauthCallbackUrl,
@@ -35,17 +24,16 @@ router.get('/oauth/authorize', (ctx, next) => {
     'snsapi_base'
   )
 
+  console.log(url)
+
   ctx.redirect(url)
 })
 
 router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   console.log(`wechat web oauth redirect correct`)
-  console.log(ctx.query)
 
   const openid = await getOpenID(ctx.query.code)
   const userInfo = await getUser(openid)
-
-  console.log(userInfo)
 
   const token = jwt.sign(
     {
