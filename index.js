@@ -46,7 +46,8 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   )
 
   ctx.redirect(
-    ctx.query.state + `?access_token=${openid}&expires_in=${12 * 60 * 60}`
+    ctx.query.state +
+      `?access_token=${token}&openid=${openid}&expires_in=${12 * 60 * 60}`
   )
 })
 
