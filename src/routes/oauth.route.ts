@@ -37,6 +37,7 @@ router.get('/oauth/authorize', (ctx, next) => {
         }
       )
     : ctx.query.redirect_uri
+
   const url = wechatHelper.getAuthorizeURL(state)
 
   ctx.redirect(url)
@@ -47,7 +48,7 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   const userInfo = (await wechatHelper.getUser(openid)) as UserInfo
 
   // 将用户信息写进数据库
-  const registerInfo = await fakeFetchRegisterInfo(userInfo)
+  const registerInfo = (await fakeFetchRegisterInfo(userInfo)) as any
   console.log(registerInfo)
   const token = jwt.sign(registerInfo, config.jwtSecret, {
     expiresIn: '12h'
