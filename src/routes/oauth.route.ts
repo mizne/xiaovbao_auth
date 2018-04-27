@@ -106,12 +106,4 @@ async function fetchRegisterInfo(userInfo: UserInfo) {
       console.log(`fetchRegisterInfo failed, error: ${err.message}`)
       return Promise.reject(err)
     })
-  // return Math.random() > 0.5
-  //   ? {
-  //       openId: userInfo.openid
-  //     }
-  //   : {
-  //       tenantId: 'fakeTenantId',
-  //       userId: 'fakeUserId'
-  //     }
 }
