@@ -6,6 +6,18 @@ import wechatHelper from '../helpers/wechat'
 
 const router = new Router()
 
+export interface UserInfo {
+  openid: string
+  nickname: string
+  sex: number
+  language: string
+  city: string
+  province: string
+  country: string
+  headimgurl: string
+  privilege: string[]
+}
+
 router.get('/oauth/authorize', (ctx, next) => {
   const query = ctx.query
   if (!ctx.query.redirect_uri) {
@@ -32,29 +44,29 @@ router.get('/oauth/authorize', (ctx, next) => {
 
 router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   const openid = await wechatHelper.getOpenID(ctx.query.code)
-  const userInfo = await wechatHelper.getUser(openid)
+  const userInfo = (await wechatHelper.getUser(openid)) as UserInfo
 
   // 将用户信息写进数据库
-
-  const token = jwt.sign(
-    {
-      openid: openid
-    },
-    config.jwtSecret,
-    {
-      expiresIn: '12h'
-    }
-  )
+  const registerInfo = await fakeFetchRegisterInfo(userInfo)
+  console.log(registerInfo)
+  const token = jwt.sign(registerInfo, config.jwtSecret, {
+    expiresIn: '12h'
+  })
 
   // 开发环境 微信网页授权state有长度限制 故不用token
   const redirect_uri = config.environment.production
     ? (jwt.verify(ctx.query.state, config.jwtSecret) as any).redirect_uri
     : ctx.query.state
 
-  ctx.redirect(
+  const redirect_url =
     redirect_uri +
-      `?access_token=${token}&openid=${openid}&expires_in=${12 * 60 * 60}`
-  )
+    `?access_token=${token}&expires_in=${12 * 60 * 60}&${
+      registerInfo.openId
+        ? `openid=${registerInfo.openId}`
+        : `tenantid=${registerInfo.tenantId}&userid=${registerInfo.userId}`
+    }`
+  console.log(`redirect_url: ${redirect_url}`)
+  ctx.redirect(redirect_url)
 })
 
 // 测试授权回调是否成功
@@ -63,3 +75,14 @@ router.get('/oauth/test', async (ctx, next) => {
 })
 
 export default router
+
+async function fakeFetchRegisterInfo(userInfo: UserInfo) {
+  return Math.random() > 0.5
+    ? {
+        openId: userInfo.openid
+      }
+    : {
+        tenantId: 'fakeTenantId',
+        userId: 'fakeUserId'
+      }
+}
