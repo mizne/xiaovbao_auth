@@ -80,7 +80,7 @@ export default router
 
 async function fetchRegisterInfo(userInfo: UserInfo) {
   return axios
-    .post('https://deal.xiaovbao.cn', {
+    .post('https://deal.xiaovbao.cn/v2/data/GetUserServiceInfo', {
       params: {
         ServiceType: 'ExhibitorShow',
         Name: userInfo.nickname,
