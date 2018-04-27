@@ -1,5 +1,6 @@
 import * as Router from 'koa-router'
 import * as jwt from 'jsonwebtoken'
+import axios from 'axios'
 
 import config from '../../config/config'
 import wechatHelper from '../helpers/wechat'
@@ -48,7 +49,7 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
   const userInfo = (await wechatHelper.getUser(openid)) as UserInfo
 
   // 将用户信息写进数据库
-  const registerInfo = (await fakeFetchRegisterInfo(userInfo)) as any
+  const registerInfo = (await fetchRegisterInfo(userInfo)) as any
   console.log(registerInfo)
   const token = jwt.sign(registerInfo, config.jwtSecret, {
     expiresIn: '12h'
@@ -77,13 +78,40 @@ router.get('/oauth/test', async (ctx, next) => {
 
 export default router
 
-async function fakeFetchRegisterInfo(userInfo: UserInfo) {
-  return Math.random() > 0.5
-    ? {
-        openId: userInfo.openid
+async function fetchRegisterInfo(userInfo: UserInfo) {
+  return axios
+    .post('https://deal.xiaovbao.cn', {
+      params: {
+        ServiceType: 'ExhibitorShow',
+        Name: userInfo.nickname,
+        OpenId: userInfo.openid,
+        Logo: userInfo.headimgurl,
+        Sex: String(userInfo.sex),
+        Type: '2'
       }
-    : {
-        tenantId: 'fakeTenantId',
-        userId: 'fakeUserId'
+    })
+    .then(res => {
+      if (res.data.result.IfRegister) {
+        return {
+          tenantId: res.data.result.TenantId,
+          userId: res.data.result.UserId
+        }
+      } else {
+        return {
+          openId: userInfo.openid
+        }
       }
+    })
+    .catch(err => {
+      console.log(`fetchRegisterInfo failed, error: ${err.message}`)
+      return Promise.reject(err)
+    })
+  // return Math.random() > 0.5
+  //   ? {
+  //       openId: userInfo.openid
+  //     }
+  //   : {
+  //       tenantId: 'fakeTenantId',
+  //       userId: 'fakeUserId'
+  //     }
 }
