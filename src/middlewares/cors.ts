@@ -38,7 +38,6 @@ export default function crossOrigin(options: CorsOptions = {}) {
       origin = options.origin(ctx)
     } else {
       origin = options.origin || ctx.get('Origin') || '*'
-      console.log(`origin: ${origin}`)
     }
     if (!origin) {
       return await next()
