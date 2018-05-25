@@ -6,7 +6,11 @@ import axios from 'axios'
 const router = new Router()
 
 router.get('/oauth/wechat-jsconfig', async (ctx, next) => {
-  const config = await wechatHelper.getJsConfig()
+  const url = ctx.query.url
+
+  console.log(`url: ${decodeURIComponent(url)}`)
+
+  const config = await wechatHelper.getJsConfig(url)
 
   ctx.body = config
 })

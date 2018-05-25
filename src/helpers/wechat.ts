@@ -11,7 +11,7 @@ interface GetAuthorizeURLOptions {
   scope?: 'snsapi_base' | 'snsapi_userinfo'
 }
 
-const DEFAULT_SCOPE = 'snsapi_base'
+const DEFAULT_SCOPE = 'snsapi_userinfo'
 
 function getAuthorizeURL(opt: GetAuthorizeURLOptions): string
 function getAuthorizeURL(state: string): string
@@ -39,9 +39,9 @@ function getOpenID(code: string): Promise<string> {
   })
 }
 
-function getJsConfig(): Promise<Object> {
+function getJsConfig(url: string): Promise<Object> {
   return new Promise((resolve, reject) => {
-    wechatApi.getJsConfig({}, (err: Error, result: any) => {
+    wechatApi.getJsConfig({url}, (err: Error, result: any) => {
       if (err) {
         return reject(err)
       }
