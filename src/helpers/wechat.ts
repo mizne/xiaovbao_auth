@@ -61,9 +61,23 @@ function getUser(openid: string): Promise<Object> {
   })
 }
 
+
+function getBuffer(mediaId: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    wechatApi.getMedia(mediaId, (err: Error, result: any) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(result)
+      }
+    })
+  })
+}
+
 export default {
   getAuthorizeURL,
   getOpenID,
   getJsConfig,
-  getUser
+  getUser,
+  getBuffer
 }

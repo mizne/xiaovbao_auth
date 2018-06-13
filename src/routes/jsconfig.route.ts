@@ -1,5 +1,6 @@
 import * as Router from 'koa-router'
 import wechatHelper from '../helpers/wechat'
+import { uploadCos } from '../helpers/cos'
 import * as fs from 'fs'
 import axios from 'axios'
 
@@ -13,6 +14,16 @@ router.get('/oauth/wechat-jsconfig', async (ctx, next) => {
   const config = await wechatHelper.getJsConfig(url)
 
   ctx.body = config
+})
+
+router.get('/oauth/upload-media', async (ctx, next) => {
+  const mediaId = ctx.query.mediaId
+  console.log(`mediaId: ${mediaId}`)
+
+  const buffer = await wechatHelper.getBuffer(mediaId)
+
+  const result = await uploadCos(buffer)
+  ctx.body = result
 })
 
 router.get('/oauth/image', async (ctx, next) => {

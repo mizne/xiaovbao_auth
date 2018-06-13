@@ -81,22 +81,11 @@ router.get('/oauth/authorize', (ctx, next) => {
 router.get('/oauth/wechat-website-oauth', async (ctx, next) => {
   const redirectUrl = ctx.query.state
   const data = await getWebsiteUserInfo(ctx.query.code)
-  let loginResult
-  try {
-    loginResult = await loginFromWechatWebsite(data)
-  } catch (e) {
-    console.log(`wechat website oauth failure; `, e.message)
-    return ctx.redirect(redirectUrl + `?${querystring.stringify({
-      wechatLogin: false,
-      errorMsg: e.message
-    })}`)
-  }
 
-  console.log('login wechat website success, ', loginResult)
-  ctx.redirect(redirectUrl + `?${querystring.stringify({
-    tenantId: loginResult.tenantId,
-    userId: loginResult.userId
-  })}`)
+  console.log(`data: `, data)
+  const result = data.unionid ? {unionid: data.unionid, openid: data.openid} : {openid: data.openid}
+  
+  ctx.redirect(decodeURIComponent(redirectUrl) + `?${querystring.stringify(result)}`)
 })
 
 router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
@@ -108,23 +97,12 @@ router.get('/oauth/wechat-web-oauth', async (ctx, next) => {
     : querystring.parse(ctx.query.state)
 
   console.log(`userinfo: `, userInfo)
-  const exhibition_id = state.exhibition_id
 
-  // 将用户信息写进数据库
-  const loginInfo = (await loginFromExhibitorShow(userInfo, exhibition_id)) as any
-  console.log('loginFromExhibitorShow info: ', loginInfo)
-  const token = jwt.sign(loginInfo, config.jwtSecret, {
-    expiresIn: '12h'
-  })
-
-  // 开发环境 微信网页授权state有长度限制 故不用token
   const redirect_uri = state.redirect_uri
-
-  const redirect_url =
-    redirect_uri +
-    `?access_token=${token}&expires_in=${12 * 60 * 60}&username=${loginInfo.userName}&regtype=${loginInfo.regType}&reg=${loginInfo.reg}&visitorrecordid=${loginInfo.visitorRecordId}&type=${loginInfo.type}&tenantid=${loginInfo.tenantId}&userid=${loginInfo.userId}&openid=${loginInfo.openId}`
+  const redirect_url = redirect_uri + `?openid=${userInfo.openid}&nickname=${encodeURIComponent(userInfo.nickname)}&sex=${userInfo.sex}&language=${userInfo.language}&city=${userInfo.city}&province=${userInfo.province}&country=${userInfo.country}&headimgurl=${userInfo.headimgurl}&unionid=${userInfo.unionid}`;
   
-    ctx.redirect(redirect_url)
+  console.log(`redirect_url: ${redirect_url}`)
+  ctx.redirect(redirect_url)
 })
 
 // 测试授权回调是否成功
@@ -156,16 +134,7 @@ async function loginFromExhibitorShow(userInfo: UserInfo, exhibition_id: string)
         console.log(`loginFromExhibitorShow api failed, result: ${res.data}`)
         return Promise.reject(new Error(res.data.resMsg))
       }
-      return Promise.resolve({
-        tenantId: res.data.result[0].TenantId,
-        userId: res.data.result[0].UserId,
-        openId: userInfo.openid,
-        type: res.data.result[0].Type,
-        userName: res.data.result[0].UserName,
-        regType: res.data.result[0].RegType,
-        reg: res.data.result[0].Reg,
-        visitorRecordId: res.data.result[0].VisitorRecordId
-      })
+      return Promise.resolve(res.data.result)
     })
     .catch(err => {
       console.log(`loginFromExhibitorShow failed, error: `, err)
