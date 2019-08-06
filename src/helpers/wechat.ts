@@ -3,8 +3,16 @@ const WechatOAuth = require('wechat-oauth')
 const WechatAPI = require('wechat-api')
 import config from '../../config/config'
 
-const wechatClient = new WechatOAuth(config.wechatPublicPlatform.appId, config.wechatPublicPlatform.secret)
-const wechatApi = new WechatAPI(config.wechatPublicPlatform.appId, config.wechatPublicPlatform.secret)
+const wechatClientBaiZhanKe = new WechatOAuth(config.wechatPublicPlatformBaiZhanKe.appId, config.wechatPublicPlatformBaiZhanKe.secret)
+const wechatApiBaiZhanKe = new WechatAPI(config.wechatPublicPlatformBaiZhanKe.appId, config.wechatPublicPlatformBaiZhanKe.secret)
+
+const wechatClientHuDong = new WechatOAuth(config.wechatPublicPlatformHuDong.appId, config.wechatPublicPlatformHuDong.secret)
+const wechatApiHuDong = new WechatAPI(config.wechatPublicPlatformHuDong.appId, config.wechatPublicPlatformHuDong.secret)
+
+export enum PublicPlatforms {
+  BAIZHANKE = 'BAIZHANKE',
+  HUDONG = 'HUDONG'
+}
 
 interface GetAuthorizeURLOptions {
   state: string
@@ -13,14 +21,14 @@ interface GetAuthorizeURLOptions {
 
 const DEFAULT_SCOPE = 'snsapi_userinfo'
 
-function getAuthorizeURL(opt: GetAuthorizeURLOptions): string
-function getAuthorizeURL(state: string): string
-function getAuthorizeURL(params: GetAuthorizeURLOptions | string): string {
+function getAuthorizeURL(params: GetAuthorizeURLOptions | string, publicPlatform = PublicPlatforms.BAIZHANKE): string {
   const scope =
     typeof params === 'string' ? DEFAULT_SCOPE : params.scope || DEFAULT_SCOPE
   const state = typeof params === 'string' ? params : params.state
-  return wechatClient.getAuthorizeURL(
-    config.wechatPublicPlatform.oauthCallbackUrl,
+  const client = resolveWechatClient(publicPlatform)
+  const config = resolveConfig(publicPlatform)
+  return client.getAuthorizeURL(
+    config.oauthCallbackUrl,
     state,
     scope
   )
@@ -32,9 +40,10 @@ function getWebSiteAuthorizeURL(state: string): string {
   return `https://open.weixin.qq.com/connect/qrconnect?appid=${appid}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_login&state=${state}#wechat_redirect`
 }
 
-function getOpenID(code: string): Promise<string> {
+function getOpenID(code: string, publicPlatform = PublicPlatforms.BAIZHANKE): Promise<string> {
+  const client = resolveWechatClient(publicPlatform)
   return new Promise<string>((resolve, reject) => {
-    wechatClient.getAccessToken(code, (err: Error, result: any) => {
+    client.getAccessToken(code, (err: Error, result: any) => {
       if (err) {
         return reject(err)
       }
@@ -45,9 +54,10 @@ function getOpenID(code: string): Promise<string> {
   })
 }
 
-function getJsConfig(url: string): Promise<Object> {
+function getJsConfig(url: string, publicPlatform = PublicPlatforms.BAIZHANKE): Promise<Object> {
+  const wechatAPI = resolveWechatAPI(publicPlatform)
   return new Promise((resolve, reject) => {
-    wechatApi.getJsConfig({url}, (err: Error, result: any) => {
+    wechatAPI.getJsConfig({ url }, (err: Error, result: any) => {
       if (err) {
         return reject(err)
       }
@@ -56,9 +66,11 @@ function getJsConfig(url: string): Promise<Object> {
   })
 }
 
-function getUser(openid: string): Promise<UserInfo> {
+
+function getUser(openid: string, publicPlatform = PublicPlatforms.BAIZHANKE): Promise<UserInfo> {
+  const client = resolveWechatClient(publicPlatform)
   return new Promise((resolve, reject) => {
-    wechatClient.getUser(openid, (err: Error, result: any) => {
+    client.getUser(openid, (err: Error, result: any) => {
       if (err) {
         return reject(err)
       }
@@ -68,9 +80,10 @@ function getUser(openid: string): Promise<UserInfo> {
 }
 
 
-function getBuffer(mediaId: string): Promise<any> {
+function getBuffer(mediaId: string, publicPlatform = PublicPlatforms.BAIZHANKE): Promise<any> {
+  const wechatAPI = resolveWechatAPI(publicPlatform)
   return new Promise((resolve, reject) => {
-    wechatApi.getMedia(mediaId, (err: Error, result: any) => {
+    wechatAPI.getMedia(mediaId, (err: Error, result: any) => {
       if (err) {
         reject(err)
       } else {
@@ -92,6 +105,39 @@ function getWebsiteUserInfo(code: string): Promise<WebsiteUserInfo> {
       return resolve(data)
     });
   })
+}
+
+function resolveWechatClient(publicPlatform: PublicPlatforms) {
+  switch (publicPlatform) {
+    case PublicPlatforms.HUDONG:
+      return wechatClientHuDong;
+    case PublicPlatforms.BAIZHANKE:
+      return wechatClientBaiZhanKe
+    default:
+      return wechatClientBaiZhanKe
+  }
+}
+
+function resolveWechatAPI(publicPlatform: PublicPlatforms) {
+  switch (publicPlatform) {
+    case PublicPlatforms.HUDONG:
+      return wechatApiHuDong;
+    case PublicPlatforms.BAIZHANKE:
+      return wechatApiBaiZhanKe
+    default:
+      return wechatApiBaiZhanKe
+  }
+}
+
+function resolveConfig(publicPlatform: PublicPlatforms) {
+  switch (publicPlatform) {
+    case PublicPlatforms.HUDONG:
+      return config.wechatPublicPlatformHuDong;
+    case PublicPlatforms.BAIZHANKE:
+      return config.wechatPublicPlatformBaiZhanKe
+    default:
+      return config.wechatPublicPlatformBaiZhanKe
+  }
 }
 
 
